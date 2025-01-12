@@ -8,9 +8,15 @@ const { sequelize } = require("./models/index.model");
 
 const { errorValidationResponse } = require("./configs/response");
 
-const { validateRegister } = require("./validators/register.validator");
+const {
+  validateRegister,
+  validateLogin,
+} = require("./validators/auth.validator");
 
-const { registerController } = require("./controllers/auth.controller");
+const {
+  registerController,
+  loginController,
+} = require("./controllers/auth.controller");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -49,6 +55,20 @@ router.post("/register", validateRegister, (req, res) => {
   }
 
   registerController(req, res, startTime);
+});
+
+// login
+router.post("/login", validateLogin, (req, res) => {
+  const startTime = Date.now();
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const timeExecution = Date.now() - startTime;
+
+    return errorValidationResponse(res, errors, timeExecution);
+  }
+
+  loginController(req, res, startTime);
 });
 
 app.use("/iso/api", router);
