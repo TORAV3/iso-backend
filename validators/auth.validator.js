@@ -22,6 +22,17 @@ const validateRegister = [
   body("password").trim().notEmpty().withMessage("Password tidak boleh kosong"),
 ];
 
+const validateLogin = [
+  body("email")
+    .isLength({ max: 60 })
+    .withMessage("Email tidak boleh lebih dari 60 karakter.")
+    .trim()
+    .notEmpty()
+    .withMessage("Email tidak boleh kosong"),
+  body("password").trim().notEmpty().withMessage("Password tidak boleh kosong"),
+];
+
 module.exports = {
   validateRegister,
+  validateLogin,
 };
