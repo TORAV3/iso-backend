@@ -12,8 +12,13 @@ const sequelize = new Sequelize(
 );
 
 const user = require("./user.model")(sequelize, Sequelize);
+const member = require("./member.model")(sequelize, Sequelize);
+
+user.associate({ member });
+member.associate({ user });
 
 module.exports = {
   sequelize,
   user,
+  member,
 };

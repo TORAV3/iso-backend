@@ -18,7 +18,9 @@ const validateRegister = [
     .withMessage("Nomor telepon tidak boleh lebih dari 14 karakter.")
     .trim()
     .notEmpty()
-    .withMessage("No. telp tidak boleh kosong"),
+    .withMessage("No. telp tidak boleh kosong")
+    .matches(/^(?:\+62|62|0)[2-9][0-9]{7,11}$/)
+    .withMessage("No. telp tidak valid"),
   body("password").trim().notEmpty().withMessage("Password tidak boleh kosong"),
 ];
 
