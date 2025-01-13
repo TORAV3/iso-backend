@@ -12,15 +12,33 @@ const {
   validateRegister,
   validateLogin,
 } = require("./validators/auth.validator");
+const { validateMemberRegister } = require("./validators/member.validator");
 
 const {
   registerController,
   loginController,
 } = require("./controllers/auth.controller");
+const {
+  memberRegistrationController,
+  getAllMemberController,
+  getMemberByIdController,
+} = require("./controllers/member.controller");
+const {
+  getAllUserController,
+  getUserByIdController,
+} = require("./controllers/user.controller");
 
 const app = express();
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(
+  bodyParser.urlencoded({
+    limit: "50mb",
+    extended: true,
+    parameterLimit: 50000,
+  })
+);
 
 const allowedOrigins = ["http://127.0.0.1:5173", "http://localhost:5173"];
 
@@ -69,6 +87,27 @@ router.post("/login", validateLogin, (req, res) => {
   }
 
   loginController(req, res, startTime);
+});
+
+//user
+router.get("/user", getAllUserController);
+router.get("/user/:id", getUserByIdController);
+
+//member
+router.get("/member", getAllMemberController);
+router.get("/member/:id", getMemberByIdController);
+
+router.post("/member/register", validateMemberRegister, (req, res) => {
+  const startTime = Date.now();
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const timeExecution = Date.now() - startTime;
+
+    return errorValidationResponse(res, errors, timeExecution);
+  }
+
+  memberRegistrationController(req, res, startTime);
 });
 
 app.use("/iso/api", router);
