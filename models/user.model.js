@@ -26,6 +26,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(60),
         allowNull: false,
       },
+      status: {
+        type: DataTypes.STRING(20),
+        allowNull: true,
+        defaultValue: "register",
+      },
     },
     {
       tableName: "users",
@@ -38,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   user.associate = (models) => {
-    user.hasOne(models.member, { foreignKey: "userId" });
+    user.hasOne(models.userDetail, { foreignKey: "userId" });
   };
 
   return user;

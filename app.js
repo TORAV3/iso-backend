@@ -12,21 +12,23 @@ const {
   validateRegister,
   validateLogin,
 } = require("./validators/auth.validator");
-const { validateMemberRegister } = require("./validators/member.validator");
+const { validateUserDetail } = require("./validators/userDetail.validator");
+const {
+  validateUpdateStatusUser,
+} = require("./validators/updateStatusUser.validator");
 
 const {
   registerController,
   loginController,
 } = require("./controllers/auth.controller");
 const {
-  memberRegistrationController,
-  getAllMemberController,
-  getMemberByIdController,
-} = require("./controllers/member.controller");
-const {
   getAllUserController,
   getUserByIdController,
+  updateStatusUserByIdController,
 } = require("./controllers/user.controller");
+const {
+  addUserDetailController,
+} = require("./controllers/userDetail.controller");
 
 const app = express();
 // app.use(bodyParser.urlencoded({ extended: true }));
@@ -92,12 +94,7 @@ router.post("/login", validateLogin, (req, res) => {
 //user
 router.get("/user", getAllUserController);
 router.get("/user/:id", getUserByIdController);
-
-//member
-router.get("/member", getAllMemberController);
-router.get("/member/:id", getMemberByIdController);
-
-router.post("/member/register", validateMemberRegister, (req, res) => {
+router.post("/user/detail", validateUserDetail, (req, res) => {
   const startTime = Date.now();
 
   const errors = validationResult(req);
@@ -107,7 +104,19 @@ router.post("/member/register", validateMemberRegister, (req, res) => {
     return errorValidationResponse(res, errors, timeExecution);
   }
 
-  memberRegistrationController(req, res, startTime);
+  addUserDetailController(req, res, startTime);
+});
+router.put("/user/status/:id", validateUpdateStatusUser, (req, res) => {
+  const startTime = Date.now();
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const timeExecution = Date.now() - startTime;
+
+    return errorValidationResponse(res, errors, timeExecution);
+  }
+
+  updateStatusUserByIdController(req, res, startTime);
 });
 
 app.use("/iso/api", router);

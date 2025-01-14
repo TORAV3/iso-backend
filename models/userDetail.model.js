@@ -1,9 +1,9 @@
 module.exports = (sequelize, DataTypes) => {
-  const member = sequelize.define(
-    "member",
+  const userDetail = sequelize.define(
+    "userDetail",
     {
       id: {
-        type: DataTypes.STRING(15),
+        type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
       },
@@ -150,7 +150,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
-      tableName: "members",
+      tableName: "user_details",
       timestamps: true,
       paranoid: true,
       createdAt: "created_at",
@@ -159,9 +159,9 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  member.associate = (models) => {
-    member.belongsTo(models.user, { foreignKey: "userId" });
+  userDetail.associate = (models) => {
+    userDetail.belongsTo(models.user, { foreignKey: "userId" });
   };
 
-  return member;
+  return userDetail;
 };

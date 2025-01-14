@@ -2,119 +2,39 @@ const { Sequelize, Op } = require("sequelize");
 const fs = require("fs");
 const path = require("path");
 const moment = require("moment");
-const { member, user } = require("../models/index.model");
+const { user, userDetail } = require("../models/index.model");
 const {
   badRequestResponse,
   internalServerErrorResponse,
   successCreatedResponse,
-  successResponse,
-  notfoundResponse,
 } = require("../configs/response");
 
-const getAllMemberController = async (req, res) => {
-  const startTime = Date.now();
-  try {
-    const members = await member.findAll({
-      include: user,
-    });
-    const timeExecution = Date.now() - startTime;
-    return successResponse(res, members, timeExecution);
-  } catch (error) {
-    console.log(error);
-    const timeExecution = Date.now() - startTime;
-    return internalServerErrorResponse(res, timeExecution);
-  }
-};
+// const generateMemberId = async (req, res) => {
+//   const today = moment().format("DDMMYY");
 
-const getMemberByIdController = async (req, res) => {
-  const startTime = Date.now();
+//   const latestMember = await member.findOne({
+//     where: {
+//       id: {
+//         [Op.like]: `ISO${today}%`,
+//       },
+//     },
+//     order: [["id", "DESC"]],
+//   });
 
-  const { id } = req.params;
+//   let counter = 1;
 
-  try {
-    const memberData = await member.findOne({
-      where: {
-        id,
-      },
-      include: user,
-    });
+//   if (latestMember) {
+//     const lastId = latestMember.id;
+//     const lastCounter = parseInt(lastId.slice(-3), 10);
+//     counter = lastCounter + 1;
+//   }
 
-    if (!memberData) {
-      const timeExecution = Date.now() - startTime;
-      return notfoundResponse(res, "Member tidak ditemukan", timeExecution);
-    }
+//   const newId = `ISO${today}${String(counter).padStart(3, "0")}`;
 
-    const memberPlain = memberData.toJSON();
+//   return newId;
+// };
 
-    const encodeFileToBase64 = (fileName, folderId) => {
-      if (!fileName) return null;
-      const userFolderPath = path.join(
-        __dirname,
-        "../public/upload",
-        folderId.toString()
-      );
-      const filePath = path.join(userFolderPath, fileName);
-
-      if (fs.existsSync(filePath)) {
-        const fileBuffer = fs.readFileSync(filePath);
-        return `data:image/${path
-          .extname(fileName)
-          .slice(1)};base64,${fileBuffer.toString("base64")}`;
-      }
-      return null;
-    };
-
-    memberPlain.ktpBase64 = encodeFileToBase64(memberPlain.ktp, id);
-    memberPlain.kkBase64 = encodeFileToBase64(memberPlain.kk, id);
-    memberPlain.pasFotoBase64 = encodeFileToBase64(memberPlain.pasFoto, id);
-    memberPlain.fullBodyFotoBase64 = encodeFileToBase64(
-      memberPlain.fullBodyFoto,
-      id
-    );
-    memberPlain.aktaBase64 = encodeFileToBase64(memberPlain.akta, id);
-    memberPlain.ijazahBase64 = encodeFileToBase64(memberPlain.ijazah, id);
-    memberPlain.sksBase64 = encodeFileToBase64(memberPlain.sks, id);
-    memberPlain.vaksinBase64 = encodeFileToBase64(memberPlain.vaksin, id);
-    memberPlain.sertifikatBase64 = encodeFileToBase64(
-      memberPlain.sertifikat,
-      id
-    );
-
-    const timeExecution = Date.now() - startTime;
-    return successResponse(res, memberPlain, timeExecution);
-  } catch (error) {
-    console.log(error);
-    const timeExecution = Date.now() - startTime;
-    return internalServerErrorResponse(res, timeExecution);
-  }
-};
-
-const generateMemberId = async (req, res) => {
-  const today = moment().format("DDMMYY");
-
-  const latestMember = await member.findOne({
-    where: {
-      id: {
-        [Op.like]: `ISO${today}%`,
-      },
-    },
-    order: [["id", "DESC"]],
-  });
-
-  let counter = 1;
-
-  if (latestMember) {
-    const lastId = latestMember.id;
-    const lastCounter = parseInt(lastId.slice(-3), 10);
-    counter = lastCounter + 1;
-  }
-
-  const newId = `ISO${today}${String(counter).padStart(3, "0")}`;
-
-  return newId;
-};
-
-const memberRegistrationController = async (req, res, startTime) => {
+const addUserDetailController = async (req, res, startTime) => {
   Object.keys(req.body).forEach((key) => {
     if (req.body[key] === "") {
       req.body[key] = null;
@@ -155,10 +75,14 @@ const memberRegistrationController = async (req, res, startTime) => {
     userId,
   } = req.body;
 
-  const newId = await generateMemberId();
+  // const newId = await generateMemberId();
 
   try {
-    const userFolderPath = path.join(__dirname, "../public/upload", newId);
+    const userFolderPath = path.join(
+      __dirname,
+      "../public/upload",
+      userId.toString()
+    );
     if (!fs.existsSync(userFolderPath)) {
       fs.mkdirSync(userFolderPath, { recursive: true });
     }
@@ -176,15 +100,17 @@ const memberRegistrationController = async (req, res, startTime) => {
       fs.writeFileSync(filePath, base64Data, { encoding: "base64" });
     };
 
-    if (pasFoto) saveBase64ToFile(pasFoto, "pasFoto_" + newId);
-    if (fullBodyFoto) saveBase64ToFile(fullBodyFoto, "fullBodyFoto_" + newId);
-    if (ktp) saveBase64ToFile(ktp, "ktp_" + newId);
-    if (kk) saveBase64ToFile(kk, "kk_" + newId);
-    if (akta) saveBase64ToFile(akta, "akta_" + newId);
-    if (ijazah) saveBase64ToFile(ijazah, "ijazah_" + newId);
-    if (sks) saveBase64ToFile(sks, "sks_" + newId);
-    if (vaksin) saveBase64ToFile(vaksin, "vaksin_" + newId);
-    if (sertifikat) saveBase64ToFile(sertifikat, "sertifikat_" + newId);
+    if (pasFoto) saveBase64ToFile(pasFoto, "pasFoto_" + userId.toString());
+    if (fullBodyFoto)
+      saveBase64ToFile(fullBodyFoto, "fullBodyFoto_" + userId.toString());
+    if (ktp) saveBase64ToFile(ktp, "ktp_" + userId.toString());
+    if (kk) saveBase64ToFile(kk, "kk_" + userId.toString());
+    if (akta) saveBase64ToFile(akta, "akta_" + userId.toString());
+    if (ijazah) saveBase64ToFile(ijazah, "ijazah_" + userId.toString());
+    if (sks) saveBase64ToFile(sks, "sks_" + userId.toString());
+    if (vaksin) saveBase64ToFile(vaksin, "vaksin_" + userId.toString());
+    if (sertifikat)
+      saveBase64ToFile(sertifikat, "sertifikat_" + userId.toString());
 
     let pasFotoFilename = arrFilename[0];
     let fullBodyFotoFilename = arrFilename[1];
@@ -202,8 +128,7 @@ const memberRegistrationController = async (req, res, startTime) => {
       sertifikatFilename = arrFilename[8];
     }
 
-    const memberCreated = await member.create({
-      id: newId,
+    const userDetailCreated = await userDetail.create({
       trainbef,
       nik,
       gender,
@@ -240,12 +165,16 @@ const memberRegistrationController = async (req, res, startTime) => {
     const timeExecution = Date.now() - startTime;
     return successCreatedResponse(
       res,
-      "Proses pendaftaran member berhasil",
+      "Data detail berhasil disimpan",
       timeExecution
     );
   } catch (error) {
     try {
-      const userFolderPath = path.join(__dirname, "../public/upload", newId);
+      const userFolderPath = path.join(
+        __dirname,
+        "../public/upload",
+        userId.toString()
+      );
       if (fs.existsSync(userFolderPath)) {
         fs.rmSync(userFolderPath, { recursive: true, force: true });
       }
@@ -301,7 +230,5 @@ const memberRegistrationController = async (req, res, startTime) => {
 };
 
 module.exports = {
-  getAllMemberController,
-  getMemberByIdController,
-  memberRegistrationController,
+  addUserDetailController,
 };
