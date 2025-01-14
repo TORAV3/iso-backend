@@ -1,6 +1,6 @@
 const { body } = require("express-validator");
 
-const validateMemberRegister = [
+const validateUserDetail = [
   body("trainbef")
     .trim()
     .notEmpty()
@@ -150,5 +150,5 @@ const validateMemberRegister = [
 ];
 
 module.exports = {
-  validateMemberRegister,
+  validateUserDetail,
 };
