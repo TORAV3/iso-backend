@@ -17,7 +17,7 @@ const registerController = async (req, res, startTime) => {
     }
   });
 
-  const { fullname, email, phone, password } = req.body;
+  const { fullname, email, phone, password, type } = req.body;
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -27,6 +27,7 @@ const registerController = async (req, res, startTime) => {
       email,
       phone,
       password: hashedPassword,
+      type,
     });
 
     const timeExecution = Date.now() - startTime;
@@ -107,7 +108,35 @@ const loginController = async (req, res, startTime) => {
   }
 };
 
+const getLoginDataController = async (req, res) => {
+  const startTime = Date.now();
+
+  const { id } = req.userLoginData;
+
+  try {
+    const userData = await user.findOne({
+      where: {
+        id,
+      },
+      include: ["userDetail", "role", "access"],
+    });
+
+    if (!userData) {
+      const timeExecution = Date.now() - startTime;
+      return notfoundResponse(res, "User tidak ditemukan", timeExecution);
+    }
+
+    const timeExecution = Date.now() - startTime;
+    return successResponse(res, userData, timeExecution);
+  } catch (error) {
+    console.log(error);
+    const timeExecution = Date.now() - startTime;
+    return internalServerErrorResponse(res, timeExecution);
+  }
+};
+
 module.exports = {
   registerController,
   loginController,
+  getLoginDataController,
 };
