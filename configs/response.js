@@ -25,6 +25,24 @@ function notfoundResponse(res, message, timeExecution) {
   });
 }
 
+function forbiddenResponse(res, message, timeExecution) {
+  return res.status(403).json({
+    version: process.env.VERSION,
+    status: 403,
+    data: message,
+    time_execution: `${timeExecution}ms`,
+  });
+}
+
+function unauthorizeResponse(res, message, timeExecution) {
+  return res.status(401).json({
+    version: process.env.VERSION,
+    status: 401,
+    data: message,
+    time_execution: `${timeExecution}ms`,
+  });
+}
+
 function internalServerErrorResponse(res, timeExecution) {
   return res.status(500).json({
     version: process.env.VERSION,
@@ -58,5 +76,7 @@ module.exports = {
   successCreatedResponse,
   internalServerErrorResponse,
   notfoundResponse,
+  forbiddenResponse,
+  unauthorizeResponse,
   successResponse,
 };
