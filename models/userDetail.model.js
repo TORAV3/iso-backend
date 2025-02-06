@@ -134,7 +134,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       vaksin: {
         type: DataTypes.STRING(30),
-        allowNull: false,
+        allowNull: true,
       },
       sertifikat: {
         type: DataTypes.STRING(30),

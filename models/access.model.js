@@ -25,6 +25,16 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         defaultValue: "0",
       },
+      mkelas: {
+        type: DataTypes.STRING(1),
+        allowNull: true,
+        defaultValue: "0",
+      },
+      mintquestion: {
+        type: DataTypes.STRING(1),
+        allowNull: true,
+        defaultValue: "0",
+      },
     },
     {
       tableName: "accesses",
