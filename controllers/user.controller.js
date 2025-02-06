@@ -103,65 +103,70 @@ const getStudentUserByIdController = async (req, res) => {
       return notfoundResponse(res, "User tidak ditemukan", timeExecution);
     }
 
-    const userPlain = userData.toJSON();
+    if (userData.status !== "register") {
+      const userPlain = userData.toJSON();
 
-    const encodeFileToBase64 = (fileName, folderId) => {
-      if (!fileName) return null;
-      const userFolderPath = path.join(
-        __dirname,
-        "../public/upload",
-        folderId.toString()
+      const encodeFileToBase64 = (fileName, folderId) => {
+        if (!fileName) return null;
+        const userFolderPath = path.join(
+          __dirname,
+          "../public/upload",
+          folderId.toString()
+        );
+        const filePath = path.join(userFolderPath, fileName);
+
+        if (fs.existsSync(filePath)) {
+          const fileBuffer = fs.readFileSync(filePath);
+          return `data:image/${path
+            .extname(fileName)
+            .slice(1)};base64,${fileBuffer.toString("base64")}`;
+        }
+        return null;
+      };
+
+      userPlain.userDetail.ktpBase64 = encodeFileToBase64(
+        userPlain.userDetail.ktp,
+        id
       );
-      const filePath = path.join(userFolderPath, fileName);
+      userPlain.userDetail.kkBase64 = encodeFileToBase64(
+        userPlain.userDetail.kk,
+        id
+      );
+      userPlain.userDetail.pasFotoBase64 = encodeFileToBase64(
+        userPlain.userDetail.pasFoto,
+        id
+      );
+      userPlain.userDetail.fullBodyFotoBase64 = encodeFileToBase64(
+        userPlain.userDetail.fullBodyFoto,
+        id
+      );
+      userPlain.userDetail.aktaBase64 = encodeFileToBase64(
+        userPlain.userDetail.akta,
+        id
+      );
+      userPlain.userDetail.ijazahBase64 = encodeFileToBase64(
+        userPlain.userDetail.ijazah,
+        id
+      );
+      userPlain.userDetail.sksBase64 = encodeFileToBase64(
+        userPlain.userDetail.sks,
+        id
+      );
+      userPlain.userDetail.vaksinBase64 = encodeFileToBase64(
+        userPlain.userDetail.vaksin,
+        id
+      );
+      userPlain.userDetail.sertifikatBase64 = encodeFileToBase64(
+        userPlain.userDetail.sertifikat,
+        id
+      );
 
-      if (fs.existsSync(filePath)) {
-        const fileBuffer = fs.readFileSync(filePath);
-        return `data:image/${path
-          .extname(fileName)
-          .slice(1)};base64,${fileBuffer.toString("base64")}`;
-      }
-      return null;
-    };
-
-    userPlain.userDetail.ktpBase64 = encodeFileToBase64(
-      userPlain.userDetail.ktp,
-      id
-    );
-    userPlain.userDetail.kkBase64 = encodeFileToBase64(
-      userPlain.userDetail.kk,
-      id
-    );
-    userPlain.userDetail.pasFotoBase64 = encodeFileToBase64(
-      userPlain.userDetail.pasFoto,
-      id
-    );
-    userPlain.userDetail.fullBodyFotoBase64 = encodeFileToBase64(
-      userPlain.userDetail.fullBodyFoto,
-      id
-    );
-    userPlain.userDetail.aktaBase64 = encodeFileToBase64(
-      userPlain.userDetail.akta,
-      id
-    );
-    userPlain.userDetail.ijazahBase64 = encodeFileToBase64(
-      userPlain.userDetail.ijazah,
-      id
-    );
-    userPlain.userDetail.sksBase64 = encodeFileToBase64(
-      userPlain.userDetail.sks,
-      id
-    );
-    userPlain.userDetail.vaksinBase64 = encodeFileToBase64(
-      userPlain.userDetail.vaksin,
-      id
-    );
-    userPlain.userDetail.sertifikatBase64 = encodeFileToBase64(
-      userPlain.userDetail.sertifikat,
-      id
-    );
+      const timeExecution = Date.now() - startTime;
+      return successResponse(res, userPlain, timeExecution);
+    }
 
     const timeExecution = Date.now() - startTime;
-    return successResponse(res, userPlain, timeExecution);
+    return successResponse(res, userData, timeExecution);
   } catch (error) {
     console.log(error);
     const timeExecution = Date.now() - startTime;
@@ -297,6 +302,8 @@ const addInternalUserController = async (req, res, startTime) => {
     roleId,
     muser,
     usaccess,
+    mkelas,
+    mintquestion,
   } = req.body;
 
   try {
@@ -313,6 +320,8 @@ const addInternalUserController = async (req, res, startTime) => {
         access: {
           muser,
           usaccess,
+          mkelas,
+          mintquestion,
         },
       },
       { include: ["access"] }
@@ -364,7 +373,16 @@ const updateInternalUserController = async (req, res, startTime) => {
     }
   });
 
-  const { fullname, username, email, roleId, muser, usaccess } = req.body;
+  const {
+    fullname,
+    username,
+    email,
+    roleId,
+    muser,
+    usaccess,
+    mkelas,
+    mintquestion,
+  } = req.body;
 
   const { id } = req.params;
 
@@ -390,6 +408,8 @@ const updateInternalUserController = async (req, res, startTime) => {
 
     userData.access.muser = muser;
     userData.access.usaccess = usaccess;
+    userData.access.mkelas = mkelas;
+    userData.access.mintquestion = mintquestion;
 
     await userData.access.save();
 
